@@ -75,6 +75,7 @@ jQuery(document).ready(function() {
 var URL = "include/exec.php";
 var monitorInterval;
 var last = $('input[name$="tabs"]').length;
+var viewMode = "details"
 
 var categorySub = {
   backup:"backup:",
@@ -187,13 +188,16 @@ $(function(){
     }
     getContent(false,category,description,newFlag);
   });
-  myAlert("Updating Content","Retrieving the latest application Lists","/plugins/community.applications/images/spinner2.gif","40x40");
+  myAlert("Updating Content","Retrieving the latest application Lists","images/spinner2.gif","40x40");
   $.post(URL,{action:'force_update'});
 
+/*
   if ( "<?=$cfg['viewMode']?>" == "icon" ) $("#viewIcon").prop("disabled",true);
   if ( "<?=$cfg['viewMode']?>" == "table" ) $("#viewTable").prop("disabled",true);
   if ( "<?=$cfg['viewMode']?>" == "detail" ) $("#viewDetail").prop("disabled",true);
-
+*/
+  $("#viewDetail").prop("disabled",true);
+  
   getContent(true,'INITIALIZE','None Selected');
   $('#searchBox').keyup(function(e) {if(e.which == 13){doSearch(false);}});
 });
@@ -267,7 +271,7 @@ function doSearch(button) {
     }
   }
 
-  $("#Total").html("Searching... <img src='/plugins/community.applications/images/spinner2.gif' style='height:30px;width:30px'>");
+  $("#Total").html("Searching... <img src='images/spinner2.gif' style='height:30px;width:30px'>");
   $('#BackToTop').hide();
   if (filter) {
     enableButtons();
@@ -287,7 +291,7 @@ function doSearch(button) {
   }
   var sortOrder = getSortOrder();
 
-  myAlert("Searching...", "Searching for <strong><font color=red>"+filter+"</font></strong>","/plugins/community.applications/images/spinner2.gif","40x40");
+  myAlert("Searching...", "Searching for <strong><font color=red>"+filter+"</font></strong>","images/spinner2.gif","40x40");
    
   $.post(URL,{action:'get_content',filter:filter,sortOrder:sortOrder},function(data) {
     if (data) { 
@@ -317,7 +321,7 @@ function forceUpdateButton() {
   var mode = $('#updateButton').val();
   if ( mode == 'appFeed Mode' ) {
     $.post(URL,{action:'force_update_button'});
-    myAlert("Updating Content","Retrieving the latest application Lists","/plugins/community.applications/images/spinner2.gif","40x40");
+    myAlert("Updating Content","Retrieving the latest application Lists","images/spinner2.gif","40x40");
     forceUpdate();
   } else {
     swal({
@@ -365,7 +369,7 @@ function changeSortOrder(button,buttonClass,previousApps) {
   if ( $("#templateSortButtons").is(":hidden") ) {
     changeDockerView(button);
   } else {
-    $("#Total").html("Rendering... <img src='/plugins/community.applications/images/spinner2.gif' style='height:30px;width:30px'>");
+    $("#Total").html("Rendering... <img src='images/spinner2.gif' style='height:30px;width:30px'>");
 
     $.post(URL,{action:'display_content',sortOrder:sortOrder},function(data3) {
       if (data3) {
@@ -451,7 +455,7 @@ function getContent(init,category,description,newApp) {
       $("#MainCategory,#topLevelButton,#New").show();
       $(".allButtons").prop("disabled",false);
     }
-    $("#Total").html("Searching...  <img src='/plugins/community.applications/images/spinner2.gif' style='height:30px;width:30px'>");
+    $("#Total").html("Searching...  <img src='images/spinner2.gif' style='height:30px;width:30px'>");
 
     if ( category == "New" ) { category = ""; }
     if ( category == "All" ) { category = ""; }
