@@ -4,12 +4,10 @@
 # Community Applications copyright 2015-2016, Andrew Zawadzki #
 #                                                             #
 ###############################################################
-require_once("/usr/local/emhttp/plugins/community.applications/include/paths.php");
-require_once("/usr/local/emhttp/plugins/dynamix/include/Wrappers.php");
+require_once("/usr/local/emhttp/plugins/web/include/paths.php");
+#require_once("/usr/local/emhttp/plugins/dynamix/include/Wrappers.php");
 
-$unRaidSettings = my_parse_ini_file($communityPaths['unRaidVersion']);
-$unRaidVersion = $unRaidSettings['version'];
-if ($unRaidVersion == "6.2") $unRaidVersion = "6.2.0";
+$unRaidVersion = "6.3.2";
 
 ####################################################################################################
 #                                                                                                  #
@@ -32,7 +30,7 @@ function my_parse_ini_string($string, $mode=false,$scanner_mode=INI_SCANNER_NORM
 ###########################################################################
 
 function checkPluginUpdate($filename) {
-  global $unRaidVersion;
+/*   global $unRaidVersion;
 
   $filename = basename($filename);
   $installedVersion = plugin("version","/var/log/plugins/$filename");
@@ -48,36 +46,10 @@ function checkPluginUpdate($filename) {
     } else {
       return false;
     }
-  }
+  } */
   return false;
 }
 
-#############################################################
-#                                                           #
-# Helper function to return an array of directory contents. #
-# Returns an empty array if the directory does not exist    #
-#                                                           #
-#############################################################
-
-function dirContents($path) {
-  $dirContents = @scandir($path);
-  if ( ! $dirContents ) {
-    $dirContents = array();
-  }
-  return array_diff($dirContents,array(".",".."));
-}
-
-###################################################
-#                                                 #
-# Converts a file size to a human readable string #
-#                                                 #
-###################################################
-
-function human_filesize($bytes, $decimals = 2) {
-  $size = array(' B',' KB',' MB',' GB',' TB',' PB',' EB',' ZB',' YB');
-  $factor = floor((strlen($bytes) - 1) / 3);
-  return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$size[$factor];
-}
 
 ###################################################################################
 #                                                                                 #
@@ -122,7 +94,9 @@ function download_url($url, $path = "", $bg = false){
 ########################################################
  
 function getPluginLaunch($pluginName) {
-  return plugin("launch","/var/log/plugins/$pluginName");
+/*   return plugin("launch","/var/log/plugins/$pluginName");
+ */
+ return false;
 }
 
 #################################################################
@@ -242,37 +216,6 @@ function searchArray($array,$key,$value) {
   return $result;
 }
 
-##############################################################
-#                                                            #
-# Searches an array of docker mappings (host:container path) #
-# for a container mapping of /config and returns the host    #
-# path                                                       #
-#                                                            #
-##############################################################
-
-function findAppdata($volumes) {
-  $path = false;
-  $dockerOptions = @my_parse_ini_file("/boot/config/docker.cfg");
-  $defaultShareName = basename($dockerOptions['DOCKER_APP_CONFIG_PATH']);
-  $shareName = str_replace("/mnt/user/","",$defaultShareName);
-  $shareName = str_replace("/mnt/cache/","",$defaultShareName);
-  if ( ! is_file("/boot/config/shares/$shareName.cfg") ) { 
-    $shareName = "****";
-  }
-  if ( is_array($volumes) ) {
-    foreach ($volumes as $volume) {
-      $temp = explode(":",$volume);
-      $testPath = strtolower($temp[1]);
-    
-      if ( (startsWith($testPath,"/config")) || (startsWith($temp[0],"/mnt/user/$shareName")) || (startsWith($temp[0],"/mnt/cache/$shareName")) ) {
-        $path = $temp[0];
-        break;
-      }
-    }
-  }
-  return $path;
-}
-
 #############################
 #                           #
 # Highlights search results #
@@ -358,47 +301,6 @@ function fixTemplates($template) {
   return $template;
 }
 
-###############################################################
-#                                                             #
-# Function used to create XML's from appFeeds                 #
-# NOTE: single purpose, brute force creation of XML templates #
-#                                                             #
-###############################################################
-
-function makeXML($template) {
-  # ensure its a v2 template if the Config entries exist
-  if ( $template['Config'] ) {
-    if ( ! $template['@attributes'] ) {
-      $template['@attributes'] = array("version"=>2);
-    }
-  }
-
-  # handle the case where there is only a single <Config> entry
-  if ( $template['Config']['@attributes'] ) {
-    $template['Config'][0]['@attributes'] = $template['Config']['@attributes'];
-    if ( $template['Config']['value']) {
-      $template['Config'][0]['value'] = $template['Config']['value'];
-    }
-    unset($template['Config']['@attributes']);
-    unset($template['Config']['value']);
-  }
-
-  # hack to fix differing schema in the appfeed vs what Array2XML class wants
-#echo "<br>".$template['Repository']."<br>";
-  if ( $template['Config'] ) {
-    foreach ($template['Config'] as $tempArray) {
-      if ( $tempArray['value'] ) {
-        $tempArray2[] = array('@attributes'=>$tempArray['@attributes'],'@value'=>$tempArray['value']);
-      } else {
-        $tempArray2[] = array('@attributes'=>$tempArray['@attributes']);
-      }
-    }
-    $template['Config'] = $tempArray2;
-  }
-  $Array2XML = new Array2XML();
-  $xml = $Array2XML->createXML("Container",$template);
-  return $xml->saveXML();
-}
   
 ###################################################################################
 #                                                                                 #
@@ -479,67 +381,6 @@ function readXmlFile($xmlfile) {
     $o['SortName']   = $o['Name'];
   }
   return $o;
-  
-/*   $doc = new DOMDocument();
-  @$doc->load($xmlfile);
-  if ( ! $doc ) { return false; }
-
-  if ($doc->getElementsByTagName( "Branch" )->item(0)->nodeValue) {
-    var_dump($doc->getElementsByTagName("Branch"));
-  }
-  $o['Path']        = $xmlfile;
-  $o['Repository']  = stripslashes($doc->getElementsByTagName( "Repository" )->item(0)->nodeValue);
-  $o['Author']      = preg_replace("#/.*#", "", $o['Repository']);
-  $o['Name']        = stripslashes($doc->getElementsByTagName( "Name" )->item(0)->nodeValue);
-  $o['DockerHubName'] = strtolower($o['Name']);
-  $o['Beta']        = strtolower(stripslashes($doc->getElementsByTagName( "Beta" )->item(0)->nodeValue));
-  $o['Base']        = $doc->getElementsByTagName( "BaseImage" )->item(0)->nodeValue;
-  $o['Changes']     = $doc->getElementsByTagName( "Changes" )->item(0)->nodeValue;
-  $o['Date']        = $doc->getElementsByTagName( "Date" ) ->item(0)->nodeValue;
-  $o['Project']     = $doc->getElementsByTagName( "Project" ) ->item(0)->nodeValue;
-  $o['SortAuthor']  = $o['Author'];
-  $o['SortName']    = $o['Name'];
-  $o['MinVer']      = $doc->getElementsByTagName( "MinVer" ) ->item(0)->nodeValue;
-  $o['MaxVer']      = $doc->getElementsByTagName( "MaxVer" ) ->item(0)->nodeValue;
-  $o['Overview']    = $doc->getElementsByTagName("Overview")->item(0)->nodeValue;
-  if ( strlen($o['Overview']) > 0 ) {
-    $o['Description'] = stripslashes($doc->getElementsByTagName( "Overview" )->item(0)->nodeValue);
-    $o['Description'] = preg_replace('#\[([^\]]*)\]#', '<$1>', $o['Description']);
-  } else {
-    $o['Description'] = $doc->getElementsByTagName( "Description" )->item(0)->nodeValue;
-    $o['Description'] = fixDescription($o['Description']);
-  }
-  $o['Plugin']      = $doc->getElementsByTagName( "Plugin" ) ->item(0)->nodeValue;
-  $o['PluginURL']   = $doc->getElementsByTagName( "PluginURL" ) ->item(0)->nodeValue;
-  $o['PluginAuthor']= $doc->getElementsByTagName( "PluginAuthor" ) ->item(0)->nodeValue;
-
-# support both spellings
-  $o['Licence']     = $doc->getElementsByTagName( "License" ) ->item(0)->nodeValue;
-  $o['Licence']     = $doc->getElementsByTagName( "Licence" ) ->item(0)->nodeValue;
-  $o['Category']    = $doc->getElementsByTagName ("Category" )->item(0)->nodeValue;
-
-  if ( $o['Plugin'] ) {
-    $o['Author']     = $o['PluginAuthor'];
-    $o['Repository'] = $o['PluginURL'];
-    $o['Category']   .= " Plugins: ";
-    $o['SortAuthor'] = $o['Author'];
-    $o['SortName']   = $o['Name'];
-  }
-  $o['Description'] = preg_replace('#\[([^\]]*)\]#', '<$1>', $o['Description']);
-  $o['Overview']    = $doc->getElementsByTagName("Overview")->item(0)->nodeValue;
-
-  $o['Forum']       = $Repo['forum'];
-  $o['Support']     = ($doc->getElementsByTagName( "Support" )->length ) ? $doc->getElementsByTagName( "Support" )->item(0)->nodeValue : $Repo['forum'];
-  $o['Support']     = $o['Support'];
-  $o['Icon']        = stripslashes($doc->getElementsByTagName( "Icon" )->item(0)->nodeValue);
-  $o['DonateText']  = $doc->getElementsByTagName("DonateText")->item(0)->nodeValue;
-  $o['DonateLink']  = $doc->getElementsByTagName( "DonateLink")->item(0)->nodeValue;
-  if ( $doc->getElementsByTagName("DonateImage")->item(0)->nodeValue ) {
-    $o['DonateImg'] = $doc->getElementsByTagName( "DonateImage")->item(0)->nodeValue;
-  } else {
-    $o['DonateImg']   = $doc->getElementsByTagName( "DonateImg")->item(0)->nodeValue;
-  } */
-  return $o;
 }
 
 ###################################################################
@@ -566,41 +407,6 @@ function moderateTemplates() {
   writeJsonFile($communityPaths['community-templates-info'],$o);
 }
 
-############################################
-#                                          #
-# Function to write a string to the syslog #
-#                                          #
-############################################
-
-function logger($string) {
-  $string = escapeshellarg($string);
-  shell_exec("logger $string");
-}
-
-###########################################
-#                                         #
-# Function to send a dynamix notification #
-#                                         #
-###########################################
-
-function notify($event,$subject,$description,$message,$type="normal") {
-  $command = '/usr/local/emhttp/plugins/dynamix/scripts/notify -e "'.$event.'" -s "'.$subject.'" -d "'.$description.'" -m "'.$message.'" -i "'.$type.'"';
-  shell_exec($command);
-}
-
-#######################################################
-#                                                     #
-# Function to convert a Linux text file to dos format #
-#                                                     #
-#######################################################
-
-function toDOS($input,$output,$append = false) {
-  if ( $append == false ) {
-    shell_exec('/usr/bin/todos < "'.$input.'" > "'.$output.'"');
-  } else {
-    shell_exec('/usr/bin/todos < "'.$input.'" >> "'.$output.'"');
-  }
-}
 
 #######################################################
 #                                                     #
@@ -623,13 +429,7 @@ function validURL($URL) {
 ####################################################################################
 
 function getPinnedApps() {
-  global $communityPaths;
- 
-  $pinnedApps = readJsonFile($communityPaths['pinnedRam']);
-  if ( ! $pinnedApps ) {
-    $pinnedApps = readJsonFile($communityPaths['pinned']);
-  }
-  return $pinnedApps;
+  return array();
 }
 
 ########################################################
