@@ -781,5 +781,6 @@ class XML2Array {
         return self::$xml;
     }
 }
+
 ?>
 

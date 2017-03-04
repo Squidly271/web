@@ -1,7 +1,7 @@
-Menu="AppsWeb"
-Icon="community.applications.png"
-Title="Community Applications"
----
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="/node_modules/readmore-js/readmore.min.js"></script>
+</head>
 <?
 ###############################################################
 #                                                             #
@@ -72,7 +72,7 @@ jQuery(document).ready(function() {
   })
 });
 
-var URL = "/plugins/<?=$plugin?>/include/exec.php";
+var URL = "include/exec.php";
 var monitorInterval;
 var last = $('input[name$="tabs"]').length;
 
@@ -194,26 +194,18 @@ $(function(){
   if ( "<?=$cfg['viewMode']?>" == "table" ) $("#viewTable").prop("disabled",true);
   if ( "<?=$cfg['viewMode']?>" == "detail" ) $("#viewDetail").prop("disabled",true);
 
-  <?if ($tabbed):?>
-    $('.tabs').append("<span id='searchFilter' class='status vhshift' style='display:none'><input type='text' id='searchBox' class='narrow' placeholder='Search' style='margin-left:10px;margin-right:0'><button class='searchSubmit' style='margin-right:10px' onclick='doSearch(true)'><i id='searchButton' class='fa fa-search fa-lg'></i></button></span>");
-    for (var x=1; x<last; x++) $('#tab'+x).bind({click:function(){$('#searchFilter').hide();}});
-    $('#tab'+last).bind({click:function(){$('#searchFilter').show();readMore();}});
-  <?else:?>
-    $('div[id=title]').last().append("<span id='searchFilter' class='status vhshift'><input type='text' id='searchBox' class='narrow' placeholder='Search' style='margin-left:10px;margin-right:0'><button class='searchSubmit' style='margin-right:10px' onclick='doSearch(true)'><i id='searchButton' class='fa fa-search fa-lg'></i></button>");
-  <?endif;?>
-
   getContent(true,'INITIALIZE','None Selected');
   $('#searchBox').keyup(function(e) {if(e.which == 13){doSearch(false);}});
 });
 
 
 
-function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
+/* function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
   if ( !outsideClick ) outsideClick = false;
   if ( !showCancel )   showCancel = false;
   if ( !showConfirm )  showConfirm = false;
   if ( imagesize == "" ) { imagesize = "80x80"; }
-  swal({
+   swal({
     title: description,
     text: textdescription,
     imageUrl: textimage,
@@ -225,10 +217,12 @@ function myAlert(description,textdescription,textimage,imagesize, outsideClick, 
     html: true
   });
 }
-
-function myCloseAlert() {
-  swal.close();
-}
+ */
+/* function myCloseAlert() {
+<!--   swal.close(); -->
+} */
+function myAlert() {}
+function myCloseAlert() {}
 
 function readMore() {
   $('.desc_readmore').readmore({maxHeight:150});
@@ -611,7 +605,7 @@ Sort Direction:
 <center>
 <font size='2' color='red'>Note: All Applications listed here are 3rd party additions to unRaid.<br>Neither the authors of Community Applications nor Limetech make any warranty as to the suitability of any applications listed herein</font>
 </center>
-<a href="#" class="back-to-top" style="display: inline;"><img src='/plugins/community.applications/images/up.png' style='width:50px;height:50px' href="#" class="back-to-top"></img></a>
+<a href="#" class="back-to-top" style="display: inline;"><img src='images/up.png' style='width:50px;height:50px' href="#" class="back-to-top"></img></a>
 
 <span id='miscScript'>
 </FORM>

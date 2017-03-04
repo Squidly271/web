@@ -13,15 +13,16 @@
 
 $plugin = "web";
 
+$communityPaths['appfeedDataStore']              = "/tmp/web/appfeed";
 $communityPaths['persistentDataStore']           = "/tmp/web/persistent";          /* anything in this folder is NOT deleted upon an update of templates */
 $communityPaths['templates-community']           = "/tmp/web/xmls";                  /* templates and temporary files stored here.  Deleted every update of applications */
 $communityPaths['tempFiles']                     = "/tmp/web/tempFiles";                            /* path to temporary files */
-$communityPaths['baseProgram']                   = "/usr/local/emhttp/plugins/web";
+$communityPaths['baseProgram']                   = "/config/www";
 $communityPaths['community-templates-url']       = "https://raw.githubusercontent.com/Squidly271/Community-Applications-Moderators/master/Repositories.json";
 $communityPaths['Repositories']                  = $communityPaths['tempFiles']."/Repositories.json";
 $communityPaths['community-templates-info']      = $communityPaths['tempFiles']."/templates.json";                     /* json file containing all of the templates */
 $communityPaths['community-templates-displayed'] = $communityPaths['tempFiles']."/displayed.json";                     /* json file containing all of the templates currently displayed */
-$communityPaths['application-feed']              = $communityPaths['tempFiles']."/applicationFeed.json";         /* path to the application feed */
+$communityPaths['application-feed']              = $communityPaths['appfeedDataStore']."/applicationFeed.json";         /* path to the application feed */
 $communityPaths['application-feed-last-updated'] = "http://tools.linuxserver.io/unraid-docker-templates.json?last_updated=1";
 $communityPaths['lastUpdated']                   = $communityPaths['tempFiles']."/lastUpdated.json";
 $communityPaths['lastUpdated-old']               = $communityPaths['tempFiles']."/lastUpdated-old.json";
@@ -34,7 +35,7 @@ $communityPaths['moderationURL']                 = "https://raw.githubuserconten
 $communityPaths['moderation']                    = $communityPaths['persistentDataStore']."/moderation.json";          /* json file that has all of the moderation */
 $communityPaths['unRaidVersion']                 = "/etc/unraid-version";
 $communityPaths['logos']                         = $communityPaths['tempFiles']."/logos.json";
-/* $communityPaths['deleteAppdataScript']           = "/usr/local/emhttp/plugins/community.applications/scripts/deleteAppData.sh";
+$communityPaths['deleteAppdataScript']           = "/usr/local/emhttp/plugins/community.applications/scripts/deleteAppData.sh";
 $communityPaths['unRaidVars']                    = "/var/local/emhttp/var.ini";
 $communityPaths['appdataSize']                   = $communityPaths['tempFiles']."/appdata/";
 $communityPaths['calculateAppdataScript']        = "/usr/local/emhttp/plugins/community.applications/scripts/calculateAppData.sh";
@@ -47,11 +48,11 @@ $communityPaths['backupProgress']                = $communityPaths['tempFiles'].
 $communityPaths['restoreProgress']               = $communityPaths['tempFiles']."/restoreInProgress";
 $communityPaths['deleteProgress']                = $communityPaths['tempFiles']."/deleteInProgress";
 $communityPaths['backupLog']                     = $communityPaths['persistentDataStore']."/appdata_backup.log";
-/* $communityPaths['defaultShareConfig']            = "/usr/local/emhttp/plugins/community.applications/scripts/defaultShare.cfg";
+$communityPaths['defaultShareConfig']            = "/usr/local/emhttp/plugins/community.applications/scripts/defaultShare.cfg";
 $communityPaths['backupScript']                  = "/usr/local/emhttp/plugins/community.applications/scripts/backup.php";
 $communityPaths['addCronScript']                 = "/usr/local/emhttp/plugins/community.applications/scripts/addCron.php";
 $communityPaths['unRaidDockerSettings']          = "/boot/config/docker.cfg";
-$communityPaths['unRaidDisks']                   = "/var/local/emhttp/disks.ini"; */
+$communityPaths['unRaidDisks']                   = "/var/local/emhttp/disks.ini"; 
 $communityPaths['pinnedRam']                     = $communityPaths['tempFiles']."/pinned_apps.json"; # the ram copy of pinned apps for speed
 $communityPaths['pinned']                        = "/boot/config/plugins/community.applications/pinned_apps.json"; # stored on flash instead of docker.img so it will work without docker running
 $communityPaths['appOfTheDay']                   = $communityPaths['persistentDataStore']."/appOfTheDay.json";
@@ -59,6 +60,5 @@ $communityPaths['defaultSkin']                   = $communityPaths['baseProgram'
 $communityPaths['LegacyMode']                    = $communityPaths['templates-community']."/legacyModeActive";
 
 $infoFile                                        = $communityPaths['community-templates-info'];
-$docker_repos                                    = $communityPaths['template-repos'];
 
 ?>

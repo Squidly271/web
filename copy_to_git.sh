@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir -p "/tmp/GitHub/web/source/web/usr/local/emhttp/plugins/web/"
+mkdir -p "/tmp/GitHub/web/source/www"
 
-cp /usr/local/emhttp/plugins/web/* /tmp/GitHub/web/source/web/usr/local/emhttp/plugins/web -R -v -p
+cp /mnt/user/appdata/nginx/www/* /tmp/GitHub/web/source/www -R -v -p
 
 

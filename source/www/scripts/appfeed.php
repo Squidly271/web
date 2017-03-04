@@ -1,9 +1,17 @@
-#!/usr/bin/php
+#!/usr/bin/php7
 <?PHP
-require_once("/usr/local/emhttp/plugins/web/include/helpers.php");
-require_once("/usr/local/emhttp/plugins/web/include/xmlHelpers.php");
-require_once("/usr/local/emhttp/plugins/web/include/DockerClient.php");
-require_once("/usr/local/emhttp/plugins/web/include/paths.php");
+error_reporting(E_ALL & ~E_NOTICE);
+
+require_once("/config/www/include/helpers.php");
+require_once("/config/www/include/xmlHelpers.php");
+require_once("/config/www/include/DockerClient.php");
+require_once("/config/www/include/paths.php");
+
+exec("mkdir -p {$communityPaths['appfeedDataStore']}");
+exec("mkdir -p {$communityPaths['persistentDataStore']}");
+exec("mkdir -p {$communityPaths['templates-community']}");
+exec("mkdir -p {$communityPaths['tempFiles']}");
+exec("chmod 777 /tmp/web/*");
 
 function DownloadCommunityTemplates() {
   global $communityPaths, $infoFile, $plugin, $communitySettings;
@@ -30,7 +38,7 @@ function DownloadCommunityTemplates() {
 
   $templates = array();
   foreach ($Repos as $downloadRepo) {
-#    echo "Downloading ".$downloadRepo['name']."\n";
+    echo "Downloading ".$downloadRepo['name']."\n";
     $downloadURL = randomFile();
     file_put_contents($downloadURL, $downloadRepo['url']);
     $friendlyName = str_replace(" ","",$downloadRepo['name']);
@@ -38,7 +46,6 @@ function DownloadCommunityTemplates() {
     $friendlyName = str_replace('"',"",$friendlyName);
     $friendlyName = str_replace('\\',"",$friendlyName);
     $friendlyName = str_replace("/","",$friendlyName);
-
     if ( ! $downloaded = $DockerTemplates->downloadTemplates($communityPaths['templates-community']."/templates/$friendlyName", $downloadURL) ){
       $errors .= "Failed to download ".$downloadRepo['name']."\n";
       @unlink($downloadURL);
@@ -50,7 +57,7 @@ function DownloadCommunityTemplates() {
 
   @unlink($downloadURL);
   $i = $appCount;
-#  echo "\n\nProcessing XML templates\n\n";
+  echo "\n\nProcessing XML templates\n\n";
   foreach ($Repos as $Repo) {
     if ( ! is_array($templates[$Repo['url']]) ) {
       continue;
@@ -90,38 +97,6 @@ function DownloadCommunityTemplates() {
         $o['Category'] = str_replace("Status:Beta","",$o['Category']);    # undo changes LT made to my xml schema for no good reason
         $o['Category'] = str_replace("Status:Stable","",$o['Category']);
         $myTemplates[$o['ID']] = $o;
-# Branches aren't needed in the feed -> only in the local xml        
-/*         if ( is_array($o['Branch']) ) {
-          if ( ! $o['Branch'][0] ) {
-            $tmp = $o['Branch'];
-            unset($o['Branch']);
-            $o['Branch'][] = $tmp;
-          }
-          foreach($o['Branch'] as $branch) {
-            $i = ++$i;
-            $subBranch = $o;
-            $masterRepository = explode(":",$subBranch['Repository']);
-            $o['BranchDefault'] = $masterRepository[1];
-            $subBranch['Repository'] = $masterRepository[0].":".$branch['Tag']; #This takes place before any xml elements are overwritten by additional entries in the branch, so you can actually change the repo the app draws from
-            $subBranch['BranchName'] = $branch['Tag'];
-            $subBranch['BranchDescription'] = $branch['TagDescription'] ? $branch['TagDescription'] : $branch['Tag'];
-            $subBranch['Path'] = $communityPaths['templates-community']."/".$i.".xml";
-            $subBranch['Displayable'] = false;
-            $subBranch['ID'] = $i;
-            $replaceKeys = array_diff(array_keys($branch),array("Tag","TagDescription"));
-            foreach ($replaceKeys as $key) {
-              $subBranch[$key] = $branch[$key];
-            }
-            unset($subBranch['Branch']);
-            $myTemplates[$i] = $subBranch;
-            $o['BranchID'][] = $i;
-            file_put_contents($subBranch['Path'],makeXML($subBranch));
-          }
-          unset($o['Branch']);
-          $o['Path'] = $communityPaths['templates-community']."/".$o['ID'].".xml";
-          file_put_contents($o['Path'],makeXML($o));
-          $myTemplates[$o['ID']] = $o;
-        } */
         $i = ++$i;
       }
     }
@@ -134,13 +109,14 @@ function DownloadCommunityTemplates() {
   
   writeJsonFile($communityPaths['application-feed'],$apps);
   if ( $errors ) {
-#    echo "\n\nThe following errors occurred:\n\n$errors";
+    echo "\n\nThe following errors occurred:\n\n$errors";
   }
   exec("rm -rf '{$communityPaths['templates-community']}'");
 }
 
 ### start main ###
 
+exec("mkdir -p ".$communityPaths['appfeedDataStore']);
 exec("mkdir -p ".$communityPaths['persistentDataStore']);
 exec("mkdir -p ".$communityPaths['templates-community']);
 exec("mkdir -p ".$communityPaths['tempFiles']);

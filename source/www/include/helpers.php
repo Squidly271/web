@@ -4,7 +4,6 @@
 # Community Applications copyright 2015-2016, Andrew Zawadzki #
 #                                                             #
 ###############################################################
-require_once("/usr/local/emhttp/plugins/web/include/paths.php");
 #require_once("/usr/local/emhttp/plugins/dynamix/include/Wrappers.php");
 
 $unRaidVersion = "6.3.2";
@@ -558,6 +557,7 @@ function toNumericArray($template) {
     $template['Path']                     #67
   );
 }
+
   
 
   

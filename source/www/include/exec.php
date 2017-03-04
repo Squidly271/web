@@ -1,4 +1,5 @@
 <?PHP
+error_reporting(E_ALL & ~E_NOTICE);
 
 ###############################################################
 #                                                             #
@@ -6,11 +7,10 @@
 #                                                             #
 ###############################################################
 
-require_once("/usr/local/emhttp/plugins/web/include/paths.php");
-require_once("/usr/local/emhttp/plugins/web/include/helpers.php");
-require_once("/usr/local/emhttp/plugins/web/include/DockerClient.php");
-require_once("/usr/local/emhttp/plugins/web/include/xmlHelpers.php");
-
+require_once("/config/www/include/paths.php");
+require_once("/config/www/include/helpers.php");
+require_once("/config/www/include/DockerClient.php");
+require_once("/config/www/include/xmlHelpers.php");
 $plugin = "web";
 $DockerTemplates = new DockerTemplates();
 
@@ -21,7 +21,7 @@ $DockerTemplates = new DockerTemplates();
 ################################################################################
 
 #$communitySettings = parse_plugin_cfg("$plugin");
-$communitySettings['appFeed']    = "true"; # set default for deprecated setting
+$communitySettings['appFeed']    = "true";   # set default for deprecated setting
 $communitySettings['iconSize']   = "96";
 $communitySettings['maxColumn']  ="5";
 $communitySettings['separateInstalled']="false";
@@ -45,10 +45,10 @@ if ( !is_dir($communityPaths['templates-community']) ) {
   @unlink($infoFile);
 }
 
-# Make sure the link is in place
+/* # Make sure the link is in place
 if (is_dir("/usr/local/emhttp/state/plugins/$plugin")) exec("rm -rf /usr/local/emhttp/state/plugins/$plugin");
 if (!is_link("/usr/local/emhttp/state/plugins/$plugin")) symlink($communityPaths['templates-community'], "/usr/local/emhttp/state/plugins/$plugin");
-
+ */
 
 #  DownloadApplicationFeed MUST BE CALLED prior to DownloadCommunityTemplates in order for private repositories to be merged correctly.
 
@@ -290,9 +290,9 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
     }
     $template['display_removable'] = $template['Removable'] ? "<img src='/plugins/dynamix.docker.manager/images/remove.png' title='Remove Application From List' style='width:20px;height:20px;cursor:pointer' onclick='removeApp(&quot;".$template['MyPath']."&quot;,&quot;".$template['Name']."&quot;);'>" : "";
     if ( $template['Date'] > strtotime($communitySettings['timeNew'] ) ) {
-      $template['display_newIcon'] = "<img src='/plugins/$plugin/images/star.png' style='width:15px;height:15px;' title='New / Updated - ".date("F d Y",$template['Date'])."'></img>";
+      $template['display_newIcon'] = "<img src='images/star.png' style='width:15px;height:15px;' title='New / Updated - ".date("F d Y",$template['Date'])."'></img>";
     }
-    $template['display_changes'] = $template['Changes'] ? " <a style='cursor:pointer'><img src='/plugins/$plugin/images/information.png' onclick=showInfo($ID,'$appName'); title='Click for the changelog / more information'></a>" : "";
+    $template['display_changes'] = $template['Changes'] ? " <a style='cursor:pointer'><img src='images/information.png' onclick=showInfo($ID,'$appName'); title='Click for the changelog / more information'></a>" : "";
     $template['display_humanDate'] = date("F j, Y",$template['Date']);
 
     if ( $template['Plugin'] ) {
@@ -330,9 +330,9 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
     }
     $template['display_author'] = "<a style='cursor:pointer' onclick='authorSearch(this.innerHTML);' title='Search for more containers from author'>".$template['Author']."</a>";
     $displayIcon = $template['Icon'];
-    $displayIcon = $displayIcon ? $displayIcon : "/plugins/$plugin/images/question.png";
-    $template['display_iconSmall'] = "<a onclick='showDesc(".$template['ID'].",&#39;".$name."&#39;);' style='cursor:pointer'><img title='Click to display full description' src='".$displayIcon."' style='width:48px;height:48px;' onError='this.src=\"/plugins/$plugin/images/question.png\";'></a>";
-    $template['display_iconSelectable'] = "<img src='$displayIcon' onError='this.src=\"/plugins/$plugin/images/question.png\";' style='width:".$iconSize."px;height=".$iconSize."px;'>";
+    $displayIcon = $displayIcon ? $displayIcon : "images/question.png";
+    $template['display_iconSmall'] = "<a onclick='showDesc(".$template['ID'].",&#39;".$name."&#39;);' style='cursor:pointer'><img title='Click to display full description' src='".$displayIcon."' style='width:48px;height:48px;' onError='this.src=\"images/question.png\";'></a>";
+    $template['display_iconSelectable'] = "<img src='$displayIcon' onError='this.src=\"images/question.png\";' style='width:".$iconSize."px;height=".$iconSize."px;'>";
     $template['display_popupDesc'] = ( $communitySettings['maxColumn'] > 2 ) ? "Click for a full description\n".$template['PopUpDescription'] : "Click for a full description";
     $template['display_dateUpdated'] = $template['Date'] ? "</b></strong><center><strong>Date Updated: </strong>".$template['display_humanDate']."</center>" : "";
     $template['display_iconClickable'] = "<a onclick=showDesc($ID,'$appName'); style='cursor:pointer' title='".$template['display_popupDesc']."'>".$template['display_iconSelectable']."</a>";
@@ -429,16 +429,7 @@ case 'get_content':
 
   $newAppTime = strtotime($communitySettings['timeNew']);
 
-  if ( file_exists($communityPaths['addConverted']) ) {
-    @unlink($infoFile);
-    @unlink($communityPaths['addConverted']);
-  }
-
-  if ( file_exists($communityPaths['appFeedOverride']) ) {
-   $communitySettings['appFeed'] = "false";
-   @unlink($communityPaths['appFeedOverride']);
-  }
-
+  
   if (!file_exists($infoFile)) {
     if ( $communitySettings['appFeed'] == "true" ) {
       DownloadApplicationFeed();
@@ -448,9 +439,8 @@ case 'get_content':
         @unlink($infoFile);
       }
     }
-
     if ($communitySettings['appFeed'] == "false" ) {
-      if (!DownloadCommunityTemplates()) {
+      if ( true == true ) {
         echo "<table><tr><td colspan='5'><br><center>Download of source file has failed</center></td></tr></table>";
         break;
       } else {

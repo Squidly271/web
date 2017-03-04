@@ -10,7 +10,7 @@
  * all copies or substantial portions of the Software.
  */
 ?>
-<?
+<?PHP
 $docroot = $docroot ?: @$_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
 
 $dockerManPaths = [
@@ -26,18 +26,18 @@ $dockerManPaths = [
 ];
 
 #load emhttp variables if needed.
-if (!isset($var)) {
+/* if (!isset($var)) {
 	if (!is_file("$docroot/state/var.ini")) shell_exec("wget -qO /dev/null localhost:$(lsof -nPc emhttp | grep -Po 'TCP[^\d]*\K\d+')");
 	$var = @parse_ini_file("$docroot/state/var.ini");
 }
 if (!isset($eth0) && is_file("$docroot/state/network.ini")) {
 	extract(parse_ini_file("$docroot/state/network.ini",true));
-}
+} */
 
 // Docker configuration file - guaranteed to exist
-$docker_cfgfile = "/boot/config/docker.cfg";
+/* $docker_cfgfile = "/boot/config/docker.cfg";
 $dockercfg = parse_ini_file($docker_cfgfile);
-
+ */
 ######################################
 ##   	DOCKERTEMPLATES CLASS       ##
 ######################################
@@ -175,7 +175,7 @@ class DockerTemplates {
 				return null;
 			} else {
 				@mkdir($tmp_dir, 0777, true);
-				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
+				shell_exec("tar -zxf $tmp_dir.tar.gz -C $tmp_dir/ 2>&1");
 				unlink("$tmp_dir.tar.gz");
 			}
 			$tmplsStor = [];
