@@ -220,6 +220,7 @@ function showDesc(appNumber,appName) {
 }
 
 function doSearch(button) {
+  var windowWidth = getWindowWidth();
   var filter = $('#searchBox').val();
   filter = filter.replace(/[^a-z0-9]/gi,' ')
   filter = filter.trim();
@@ -269,7 +270,7 @@ function doSearch(button) {
 /*
   myAlert("Searching...", "Searching for <strong><font color=red>"+filter+"</font></strong>","images/spinner2.gif","40x40");
 */ 
-  $.post(URL,{action:'get_content',filter:filter,sortOrder:sortOrder},function(data) {
+  $.post(URL,{action:'get_content',filter:filter,sortOrder:sortOrder,windowWidth:windowWidth},function(data) {
     if (data) { 
       $('#templates_content').html(data);
       readMore();
