@@ -125,7 +125,6 @@ var categoryDesc = {
   };
 
 $(function(){
-
   $("#monitor").click(function() { Monitor(); });
   $(".viewButton,.sortButton,.dirButton").click(function() { changeSortOrder(this.id,$(this).attr("class")); });
   $(".resourceSort,.resourceDir").click(function() { changeResource(this.id,$(this).attr("class")); });
@@ -213,15 +212,11 @@ function readMore() {
 }
 
 function showInfo(appNumber,appName) {
-  openBox('<?=$execPath?>/showInfo.php?appNumber=' + appNumber,appName + " Changelog / More Information",550,550);
-}
-
-function showCredits() {
-  myAlert("Community Applications","<?=$caCredits?>","/plugins/<?=$plugin?>/images/community.applications.png","40x40", true, false, true);
+  openBox('scripts/showInfo.php?appNumber=' + appNumber,appName + " Changelog / More Information",550,550);
 }
 
 function showDesc(appNumber,appName) {
-  openBox('<?=$execPath?>/showDesc.php?appNumber=' + appNumber + '&appName=' + appName,appName + " Description",550,550);
+  openBox('scripts/showDesc.php?appNumber=' + appNumber + '&appName=' + appName,appName + " Description",550,550);
 }
 
 function doSearch(button) {
@@ -254,7 +249,7 @@ function doSearch(button) {
   $('#BackToTop').hide();
   if (filter) {
     enableButtons();
-    $("#Category").html("<?=$categoryTitle?> (Search Results for <font color='red'>"+filter+"</font>)");
+    $("#Category").html("(Search Results for <font color='red'>"+filter+"</font>)");
   } else {
     $("#Category").html("All Recommended Applications");
   }
@@ -328,9 +323,9 @@ function enableButtons() {
   $('.allButtons').prop('disabled', false);
 }
 
-
-
 function changeSortOrder(button,buttonClass,previousApps) {
+  var windowWidth = getWindowWidth();
+  
   if ( previousApps != "true" )
   {
     $("."+buttonClass).prop("disabled", false);
@@ -348,7 +343,7 @@ function changeSortOrder(button,buttonClass,previousApps) {
   } else {
     $("#Total").html("Rendering... <img src='images/spinner2.gif' style='height:15px;width:15px'>");
 
-    $.post(URL,{action:'display_content',sortOrder:sortOrder},function(data3) {
+    $.post(URL,{action:'display_content',sortOrder:sortOrder,windowWidth:windowWidth},function(data3) {
       if (data3) {
         $('#templates_content').html(data3);
         readMore();
@@ -387,6 +382,7 @@ function getContent(init,category,description,newApp) {
   $("#Total1").show();
   $("#sortButtons").show();
   $("#templateSortButtons").show();
+  var windowWidth = getWindowWidth();
 
   switch (category) {
     case 'network:':
@@ -439,7 +435,7 @@ function getContent(init,category,description,newApp) {
 
     var sortOrder = getSortOrder();
 
-    $.post(URL,{action:'get_content',category:category,newApp:newApp,sortOrder:sortOrder},function(data) {
+    $.post(URL,{action:'get_content',category:category,newApp:newApp,sortOrder:sortOrder,windowWidth:windowWidth},function(data) {
       if (data) {
         $('#templates_content').html(data);
         readMore();
@@ -475,17 +471,11 @@ function clearSearchBox() {
   }
 }
 
-
-
-function myTrim(x) {
-    return x.replace(/^\s+|\s+$/gm,'');
+function getWindowWidth() {
+  var windowWidth = $(window).width();
+  $("#windowWidth").html(windowWidth);
+  return windowWidth;
 }
-
-
-
-
-
-
 
 </script>
 
@@ -552,9 +542,9 @@ function myTrim(x) {
 
 <center>
 <br><br>
-<span id='sortButtons'>View Mode:
+<span id='sortButtons'><span hidden>View Mode:
 <input type='button' class='viewButton' value='Tables' id='viewTable' style='margin:1px'>
-<input type='button' class='viewButton' value='Icon Details' id='viewDetail' style='margin:1px'>
+<input type='button' class='viewButton' value='Icon Details' id='viewDetail' style='margin:1px'></span>
 <span id='templateSortButtons'>Sort By:
 <input type='button' class='sortButton' id='Name' value='Name' style='margin:1px' disabled>
 <input type='button' class='sortButton' id='RepoName' value='Repository' style='margin:1px'>
@@ -576,4 +566,4 @@ Sort Direction:
 </center>
 <a href="#" class="back-to-top" style="display: inline;"><img src='images/up.png' style='width:50px;height:50px' href="#" class="back-to-top"></img></a>
 
-
+<span id='windowWidth'></span>

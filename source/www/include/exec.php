@@ -402,6 +402,15 @@ function appOfDay($file) {
   return $app;
 }
 
+function getMaxColumns($windowWidth) {
+  global $communitySettings;
+  
+  if ($windowWidth < 2000) $communitySettings['maxDetailColumns'] = 3;
+  if ($windowWidth < 1500) $communitySettings['maxDetailColumns'] = 2;
+  if ($windowWidth < 1000) $communitySettings['maxDetailColumns'] = 1;
+}
+  
+  
 
 ############################################
 ############################################
@@ -425,6 +434,8 @@ case 'get_content':
   $category = "/".getPost("category",false)."/i";
   $newApp   = getPost("newApp",false);
   $sortOrder = getSortOrder(getPostArray("sortOrder"));
+  $windowWidth = getPost("windowWidth",false);
+  getMaxColumns($windowWidth);
 
   $newAppTime = strtotime($communitySettings['timeNew']);
 
@@ -675,6 +686,8 @@ case 'force_update_button':
 
 case 'display_content':
   $sortOrder = getSortOrder(getPostArray('sortOrder'));
+  $windowWidth = getPost("windowWidth",false);
+  getMaxColumns($windowWidth);
   
   if ( file_exists($communityPaths['community-templates-displayed']) ) {
     display_apps($sortOrder['viewMode']);
