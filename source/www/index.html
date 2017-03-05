@@ -353,6 +353,18 @@ function changeSortOrder(button,buttonClass,previousApps) {
   }
 }
 
+function changePage(pageNumber) {
+  var sortOrder = getSortOrder();
+  var windowWidth = getWindowWidth();
+  
+  $.post(URL,{action:'display_content',sortOrder:sortOrder,windowWidth:windowWidth,pageNumber:pageNumber},function(data3) {
+    if (data3) {
+      $('#templates_content').html(data3);
+      readMore();
+    }
+  });
+}
+
 function getSortOrder() {
   var sortOrder = new Object();
 

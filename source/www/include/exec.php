@@ -26,7 +26,8 @@ $communitySettings['separateInstalled'] = "false";     # Don't change
 $communitySettings['appOfTheDay']       = "yes";        # aggravating to set this up, but possible in the future
 $communitySettings['timeNew']           = "-3 Months"; # Legacy only -> because no maintainers update their template, makes the apps look like they're all out of date, so "New" button removed
 $communitySettings['useLogo']           = false;       # when set to false, any repository logos (ie: LSIO) will not appear next to the repo name
-
+$communitySettings['maxPerPage']        = 20;          # maximum number of results per page ( set to -1 to disable - always display all results )
+# setting the system to use pages isn't really compatible with setting a favourite repository at this moment in time.  I don't really see the need for favourite repos, but let me know.
 if ( $communitySettings['favourite'] ) {
   $officialRepo = str_replace("*","'",$communitySettings['favourite']);
   $separateOfficial = true;
@@ -152,7 +153,7 @@ function DownloadApplicationFeed() {
 #                                                          #
 ############################################################
 
-function display_apps($viewMode) {
+function display_apps($viewMode,$pageNumber=1) {
   global $communityPaths, $separateOfficial, $officialRepo, $communitySettings;
 
   $file = readJsonFile($communityPaths['community-templates-displayed']);
@@ -188,19 +189,19 @@ function display_apps($viewMode) {
       $navigate[] = "<a href='#COMMUNITY'>Community Supported Applications</a>";
       $display .= "<center><b><font size='4' color='purple' id='COMMUNITY'>Community Supported Applications</font></b></center><br>";
     }
-    $display .= my_display_apps($viewMode,$communityApplications,$runningDockers,$imagesDocker);
+    $display .= my_display_apps($viewMode,$communityApplications,$runningDockers,$imagesDocker,$pageNumber);
   }
 
   if ( $communitySettings['superCategory'] == "true" || $separateOfficial ) {
     if ( count($betaApplications) ) {
       $navigate[] = "<a href='#BETA'>Beta Applications</a>";
       $display .= "<center><b><font size='4' color='purple' id='BETA'>Beta / Work In Progress Applications</font></b></center><br>";
-      $display .= my_display_apps($viewMode,$betaApplications,$runningDockers,$imagesDocker);
+      $display .= my_display_apps($viewMode,$betaApplications,$runningDockers,$imagesDocker,$pageNumber);
     }
     if ( count($privateApplications) ) {
       $navigate[] = "<a href='#PRIVATE'>Private Applications</a>";
       $display .= "<center><b><font size='4' color='purple' id='PRIVATE'>Applications From Private Repositories</font></b></center><br>";
-      $display .= my_display_apps($viewMode,$privateApplications,$runningDockers,$imagesDocker);
+      $display .= my_display_apps($viewMode,$privateApplications,$runningDockers,$imagesDocker,$pageNumber);
     }
   }
 
@@ -223,7 +224,7 @@ function display_apps($viewMode) {
   echo $display;
 }
 
-function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
+function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker,$pageNumber=1) {
   global $communityPaths, $info, $communitySettings, $plugin;
 
   $pinnedApps = getPinnedApps();
@@ -235,7 +236,8 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
   $communitySettings['viewMode'] = $viewMode;
   file_put_contents("/tmp/huh",print_r($communityPaths,true));
   $skin = readJsonFile($communityPaths['defaultSkin']);
-  $ct = $skin[$viewMode]['header'].$skin[$viewMode]['sol'];
+  $ct = "<br>".getPageNavigation($pageNumber,count($file))."<br>";
+  $ct .= $skin[$viewMode]['header'].$skin[$viewMode]['sol'];
   $displayTemplate = $skin[$viewMode]['template'];
   if ( $viewMode == "detail" ) {
     $communitySettings['maxColumn'] = $communitySettings['maxDetailColumns']; 
@@ -243,7 +245,14 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
   }
 
   $columnNumber = 0;
+  $appCount = 0;
+  $startingApp = ($pageNumber - 1) * $communitySettings['maxPerPage'] +1;
+  $startingAppCounter = 0;
   foreach ($file as $template) {
+    $startingAppCounter++;
+    if ( $startingAppCounter < $startingApp) {
+      continue;
+    }
     $name = $template['SortName'];
     $appName = str_replace(" ","",$template['SortName']);
     $t = "";
@@ -361,11 +370,46 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
     }
  
     $ct .= $t;
+    $count++;
+    if ($count == $communitySettings['maxPerPage'] ) {
+      break;
+    }
   }
   $ct .= $skin[$viewMode]['footer'];
   $ct .= caGetMode();
+  
+  $ct .= "<br>".getPageNavigation($pageNumber,count($file))."<br>";
+  
   return $ct;
 }
+
+function getPageNavigation($pageNumber,$totalApps) {
+  global $communitySettings;
+  
+  $totalPages = intval($totalApps / $communitySettings['maxPerPage']) + 1;
+  if ($totalPages == 1) {
+    return;
+  }
+  $startApp = ($pageNumber - 1) * $communitySettings['maxPerPage'] + 1;
+  $endApp = $pageNumber * $communitySettings['maxPerPage'];
+  if ( $endApp > $totalApps ) {
+    $endApp = $totalApps;
+  }
+  $o = "<center><b>Displaying $startApp - $endApp</b>&nbsp;&nbsp;Select Page:&nbsp;&nbsp&nbsp;";
+
+  for ($i = 1; $i <= $totalPages; $i++) {
+    if ( $i == $pageNumber ) {
+      $o .= "$i";
+    } else {
+      $o .= "<b><a style='cursor:pointer' onclick='changePage(&quot;$i&quot;);' title='Go To Page $i'>$i</a></b>";
+    }
+    $o .= "&nbsp;&nbsp;&nbsp";
+  }
+  $o .= "</b></center>";
+  
+  return $o;
+}
+    
 
 #############################
 #                           #
@@ -687,10 +731,12 @@ case 'force_update_button':
 case 'display_content':
   $sortOrder = getSortOrder(getPostArray('sortOrder'));
   $windowWidth = getPost("windowWidth",false);
+  $pageNumber = getPost("pageNumber","1");
+  
   getMaxColumns($windowWidth);
   
   if ( file_exists($communityPaths['community-templates-displayed']) ) {
-    display_apps($sortOrder['viewMode']);
+    display_apps($sortOrder['viewMode'],$pageNumber);
   } else {
     echo "<center><font size='4'>Select A Category Above</font></center>";
   }
