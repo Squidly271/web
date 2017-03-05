@@ -108,6 +108,7 @@ function DownloadCommunityTemplates() {
   $apps['applist'] = $myTemplates;
   
   writeJsonFile($communityPaths['application-feed'],$apps);
+  file_put_contents($communityPaths['application-feed-last-updated'],$apps['last_updated_timestamp']);
   if ( $errors ) {
     echo "\n\nThe following errors occurred:\n\n$errors";
   }

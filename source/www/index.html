@@ -1,7 +1,5 @@
 <head>
 
-
-<link type="text/css" rel="stylesheet" href="styles/jquery.sweetalert.css">
 <link type="text/css" rel="stylesheet" href="styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="styles/font-awesome.css">
 <script src="dist/dynamix.js?v=1484433430"></script>
@@ -9,36 +7,13 @@
 <?
 ###############################################################
 #                                                             #
-# Community Applications copyright 2015-2016, Andrew Zawadzki #
+# Community Applications copyright 2015-2017, Andrew Zawadzki #
 #                                                             #
 ###############################################################
-
-require_once("/usr/local/emhttp/plugins/community.applications/include/caCredits.php");
-
-$installedVersion = exec("/usr/local/emhttp/plugins/dynamix.plugin.manager/scripts/plugin version /var/log/plugins/community.applications.plg");
-if ( is_file("/tmp/plugins/community.applications.plg") ) {
-  $upgradeVersion = exec("/usr/local/emhttp/plugins/dynamix.plugin.manager/scripts/plugin version /tmp/plugins/community.applications.plg");
-} else {
-  $upgradeVersion = "0";
-}
-$plugin = "web";
-$cfg = parse_plugin_cfg($plugin);
-$firstRun = "false";
-
-$tabMode = $cfg['newWindow'];
-$line_color = $display['theme']=='black' ? '#202020' : '#E8E8E8';
-
-$timeNew = str_replace("-","",$cfg['timeNew']);
-$categoryTitle = "Recommended Applications";
-$viewMode = $cfg['viewMode'];
-$execPath = "/plugins/$plugin/scripts";
-$commandArg="?appNumber=";
-$dockerRunning = "false";
-
 ?>
 <style>
 .searchSubmit{font-family:'FontAwesome';width:29px;height:26px;border:1px solid #dadada;border-radius:0px 4px 4px 0px;font-size:11px;position:relative;padding:0px 2px;background:#DADADA;border:none;cursor:pointer;}
-table#templates_list tbody td.topRow{border-top:1px solid <?=$line_color?>;}
+table#templates_list tbody td.topRow{border-top:1px solid #E8E8E8;}
 
 .back-to-top {
   background: none;
@@ -144,7 +119,7 @@ var categoryDesc = {
   MediaAppOther:"Media Applications: Other",
   toolssystem:"Tools: System",
   NONE:"None Selected",
-  New:"New / Updated Applications (within the last <?=$timeNew?>)",
+  New:"New / Updated Applications (within the last 3 Months)",
   UNCATEGORIZED: "All Uncategorized Applications",
   All: "All Available Applications"
   };
@@ -204,11 +179,11 @@ $(function(){
   
   getContent(true,'INITIALIZE','None Selected');
   $('#searchBox').keyup(function(e) {if(e.which == 13){doSearch(false);}});
+
 });
 
-
-
 function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
+/*
   if ( !outsideClick ) outsideClick = false;
   if ( !showCancel )   showCancel = false;
   if ( !showConfirm )  showConfirm = false;
@@ -224,10 +199,13 @@ function myAlert(description,textdescription,textimage,imagesize, outsideClick, 
     type: alertType,
     html: true
   });
+*/
 }
 
 function myCloseAlert() {
+/*
   swal.close();
+*/
 }
 
 function readMore() {
@@ -256,7 +234,6 @@ function doSearch(button) {
   $("#monitor,.appButtons").prop("disabled",false);
   $("#resourceMonitor").hide();
   $("#templates_content,#AppsOnly").show();
-  $("#AppStore").prop("disabled",true);
 
   $("#templateSortButtons").show();
 
@@ -291,10 +268,12 @@ function doSearch(button) {
     getContent(true,'INITIALIZE','None Selected');
     return;
   }
+
   var sortOrder = getSortOrder();
 
+/*
   myAlert("Searching...", "Searching for <strong><font color=red>"+filter+"</font></strong>","images/spinner2.gif","40x40");
-   
+*/ 
   $.post(URL,{action:'get_content',filter:filter,sortOrder:sortOrder},function(data) {
     if (data) { 
       $('#templates_content').html(data);
@@ -302,10 +281,6 @@ function doSearch(button) {
       myCloseAlert();
     }
     readMore();
-
-    if ( "<?=$cfg['dockerSearch']?>" == "yes" ) {
-      $('.dockerSearch').show();
-    }
   });
 }
 
@@ -483,9 +458,6 @@ function getContent(init,category,description,newApp) {
 }
 
 
-
-
-
 function authorSearch(author) {
   author = author.replace(/<(?:.|\n)*?>/gm, ''); 
   $('#searchBox').val(author);
@@ -511,27 +483,14 @@ function myTrim(x) {
 
 
 
-function appStore() {
-  clearTimeout(monitorInterval);
-  $("#templates_content").html("");
-  $("#monitor,.appButtons,.allButtons").prop("disabled",false);
-  $("#AppStore").prop("disabled",true);
-  $("#resourceMonitor,#NetworkCategory,#MediaAppCategory,#MediaServerCategory,#ToolsCategory,#NONE").hide();
-  $("#AppsOnly,#templates_content,#MainCategory,#topLevelButton,#topLevelButton").show();
-  getContent(true,'INITIALIZE','None Selected');
-  $('#searchBox').keyup(function(e) {if(e.which == 13){doSearch(false);}});
-  $("#Category").html("None Selected");
-}
-
-
 
 
 
 
 </script>
-<FORM method="get" id="myForm">
 
 <font color='red' size='6'>CA WEBSITE</font><br>
+<br><input type='text' id='searchBox' class='narrow' placeholder='Search' style='margin-left:10px;margin-right:0'><button class='searchSubmit' style='margin-right:10px' onclick='doSearch(true)'><i id='searchButton' class='fa fa-search fa-lg'></i></button>
 <strong><font size='3'><span id="Category"></span></strong></font>&nbsp;&nbsp&nbsp;<span id="Total1">Total Found: <strong><font size="3"><span id="Total"></span></font></strong></span></div>
 <br>
 
@@ -583,8 +542,9 @@ function appStore() {
 <span style='float:right'>
 <input class='allButtons' type=button id="NONE" style='margin:1px'; value='All Categories' hidden></input>
 <span id='topLevelButton'>
-<input class='allButtons' type=button id="New" style='margin:0px'; value='New/Updated'></input>
-<input class='allButtons' type=button id="UNCATEGORIZED" style='margin:0px'; value='Uncategorized'></input>
+<!-- <input class='allButtons' type=button id="New" style='margin:0px'; value='New/Updated'></input>
+**** Removed from display because customers may think that the app itself isn't up to date because very few authors actually change the template when app gets updated within
+ --><input class='allButtons' type=button id="UNCATEGORIZED" style='margin:0px'; value='Uncategorized'></input>
 <input class='allButtons' type=button id="All" style='margin:0px'; value='All Apps'></input>
 </span>
 
@@ -610,10 +570,10 @@ Sort Direction:
 
 <span id='templates_content'></span>
 
+<center>Application List Last Updated: <span id='updateTime'></span></center>
 <center>
 <font size='5' color='red'><b>Note: All Applications listed here are 3rd party additions to unRaid.<br>Neither the authors of Community Applications nor Limetech make any warranty as to the suitability of any applications listed herein</b></font>
 </center>
 <a href="#" class="back-to-top" style="display: inline;"><img src='images/up.png' style='width:50px;height:50px' href="#" class="back-to-top"></img></a>
 
-<span id='miscScript'>
-</FORM>
+

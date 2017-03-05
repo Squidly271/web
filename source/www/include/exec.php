@@ -9,10 +9,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 
 require_once("/config/www/include/paths.php");
 require_once("/config/www/include/helpers.php");
-require_once("/config/www/include/DockerClient.php");
-require_once("/config/www/include/xmlHelpers.php");
 $plugin = "web";
-$DockerTemplates = new DockerTemplates();
 
 ################################################################################
 #                                                                              #
@@ -20,14 +17,17 @@ $DockerTemplates = new DockerTemplates();
 #                                                                              #
 ################################################################################
 
-#$communitySettings = parse_plugin_cfg("$plugin");
-$communitySettings['appFeed']    = "true";   # set default for deprecated setting
-$communitySettings['iconSize']   = "96";
-$communitySettings['maxColumn']  ="5";
-$communitySettings['maxDetailColumns'] = 3;  # set for the maximum number of columns to display in details mode
-$communitySettings['separateInstalled']="false";
-$communitySettings['appOfTheDay']="no";
-if ( $communitySettings['favourite'] != "None" ) {
+#$communitySettings['favourite'] = "linuxserver's Repository";  # Uncommenting this line will always have apps from that repository show before any others in the lists.  Can be set to any repository name
+$communitySettings['appFeed']           = "true";      # set default for deprecated setting
+$communitySettings['iconSize']          = 96;          # icon size (table mode will always use 48x48)
+$communitySettings['maxColumn']         = 5;           # not used as its for icon mode only, but still needed
+$communitySettings['maxDetailColumns']  = 2;           # set for the maximum number of columns to display in details mode
+$communitySettings['separateInstalled'] = "false";     # Don't change
+$communitySettings['appOfTheDay']       = "yes";        # aggravating to set this up, but possible in the future
+$communitySettings['timeNew']           = "-3 Months"; # Legacy only -> because no maintainers update their template, makes the apps look like they're all out of date, so "New" button removed
+$communitySettings['useLogo']           = false;       # when set to false, any repository logos (ie: LSIO) will not appear next to the repo name
+
+if ( $communitySettings['favourite'] ) {
   $officialRepo = str_replace("*","'",$communitySettings['favourite']);
   $separateOfficial = true;
 }
@@ -46,12 +46,6 @@ if ( !is_dir($communityPaths['templates-community']) ) {
   @unlink($infoFile);
 }
 
-/* # Make sure the link is in place
-if (is_dir("/usr/local/emhttp/state/plugins/$plugin")) exec("rm -rf /usr/local/emhttp/state/plugins/$plugin");
-if (!is_link("/usr/local/emhttp/state/plugins/$plugin")) symlink($communityPaths['templates-community'], "/usr/local/emhttp/state/plugins/$plugin");
- */
-
-#  DownloadApplicationFeed MUST BE CALLED prior to DownloadCommunityTemplates in order for private repositories to be merged correctly.
 
 function DownloadApplicationFeed() {
   global $communityPaths, $infoFile, $plugin, $communitySettings;
@@ -150,7 +144,6 @@ function DownloadApplicationFeed() {
   @unlink($communityPaths['LegacyMode']);
   return true;
 }
-
 
 ############################################################
 #                                                          #
@@ -268,7 +261,11 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
       $template['display_UpdateAvailable'] = $template['Plugin'] ? "<br><center><font color='red'><b>Update Available.  Click <a onclick='installPLGupdate(&quot;".basename($template['MyPath'])."&quot;,&quot;".$template['Name']."&quot;);' style='cursor:pointer'>Here</a> to Install</b></center></font>" : "<br><center><font color='red'><b>Update Available.  Click <a href='Docker'>Here</a> to install</b></font></center>";
     }
     $template['display_ModeratorComment'] .= $template['ModeratorComment'] ? "</b></strong><font color='red'><b>Moderator Comments:</b></font> ".$template['ModeratorComment'] : "";
-    $tempLogo = $template['Logo'] ? "<img src='".$template['Logo']."' height=20px>" : "";
+    if ( $communitySettings['useLogo'] ) {
+      $tempLogo = $template['Logo'] ? "<img src='".$template['Logo']."' height=20px>" : "";
+    } else {
+      unset($tempLogo);
+    }
     $template['display_Announcement'] = $template['Forum'] ? "<a href='".$template['Forum']."' target='_blank' title='Click to go to the repository Announcement thread' >$RepoName $tempLogo</a>" : "$RepoName $tempLogo";
     $template['display_Stars'] = $template['stars'] ? "<img src='/plugins/$plugin/images/red-star.png' style='height:15px;width:15px'> <strong>".$template['stars']."</strong>" : "";
     $template['display_Downloads'] = $template['downloads'] ? "<center>".$template['downloads']."</center>" : "<center>Not Available</center>";
@@ -436,7 +433,7 @@ case 'get_content':
       DownloadApplicationFeed();
       if (!file_exists($infoFile)) {
         $communitySettings['appFeed'] = "false";
-        echo "<tr><td colspan='5'><br><center>Download of appfeed failed.  Reverting to legacy mode</center></td></tr>";
+        echo "<tr><td colspan='5'><br><center>Download of appfeed failed.</center></td></tr>";
         @unlink($infoFile);
       }
     }
@@ -542,7 +539,9 @@ case 'get_content':
         $template['Description'] = highlight($filter, $template['Description']);
         $template['Author'] = highlight($filter, $template['Author']);
         $template['Name'] = highlight($filter, $template['Name']);
-      } else continue;
+      } else {
+        continue;
+      }
     }
 
     if ( $communitySettings['superCategory'] == "true" ) {
