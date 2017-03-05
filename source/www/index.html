@@ -1,6 +1,10 @@
 <head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<script src="/node_modules/readmore-js/readmore.min.js"></script>
+
+
+<link type="text/css" rel="stylesheet" href="styles/jquery.sweetalert.css">
+<link type="text/css" rel="stylesheet" href="styles/default-fonts.css">
+<link type="text/css" rel="stylesheet" href="styles/font-awesome.css">
+<script src="dist/dynamix.js?v=1484433430"></script>
 </head>
 <?
 ###############################################################
@@ -204,7 +208,7 @@ $(function(){
 
 
 
-/* function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
+function myAlert(description,textdescription,textimage,imagesize, outsideClick, showCancel, showConfirm, alertType) {
   if ( !outsideClick ) outsideClick = false;
   if ( !showCancel )   showCancel = false;
   if ( !showConfirm )  showConfirm = false;
@@ -221,12 +225,10 @@ $(function(){
     html: true
   });
 }
- */
-/* function myCloseAlert() {
-<!--   swal.close(); -->
-} */
-function myAlert() {}
-function myCloseAlert() {}
+
+function myCloseAlert() {
+  swal.close();
+}
 
 function readMore() {
   $('.desc_readmore').readmore({maxHeight:150});
@@ -271,7 +273,7 @@ function doSearch(button) {
     }
   }
 
-  $("#Total").html("Searching... <img src='images/spinner2.gif' style='height:30px;width:30px'>");
+  $("#Total").html("Searching... <img src='images/spinner2.gif' style='height:15px;width:15px'>");
   $('#BackToTop').hide();
   if (filter) {
     enableButtons();
@@ -369,7 +371,7 @@ function changeSortOrder(button,buttonClass,previousApps) {
   if ( $("#templateSortButtons").is(":hidden") ) {
     changeDockerView(button);
   } else {
-    $("#Total").html("Rendering... <img src='images/spinner2.gif' style='height:30px;width:30px'>");
+    $("#Total").html("Rendering... <img src='images/spinner2.gif' style='height:15px;width:15px'>");
 
     $.post(URL,{action:'display_content',sortOrder:sortOrder},function(data3) {
       if (data3) {
@@ -455,7 +457,7 @@ function getContent(init,category,description,newApp) {
       $("#MainCategory,#topLevelButton,#New").show();
       $(".allButtons").prop("disabled",false);
     }
-    $("#Total").html("Searching...  <img src='images/spinner2.gif' style='height:30px;width:30px'>");
+    $("#Total").html("Searching...  <img src='images/spinner2.gif' style='height:15px;width:15px'>");
 
     if ( category == "New" ) { category = ""; }
     if ( category == "All" ) { category = ""; }
@@ -469,7 +471,7 @@ function getContent(init,category,description,newApp) {
         myCloseAlert();
       }
 
-      description = "<?=$categoryTitle?>: <font color='red'>"+description+"</font>";
+      description = "Category: <font color='red'>"+description+"</font>";
 
       $("#Category").html(description);
 
@@ -530,7 +532,8 @@ function appStore() {
 <FORM method="get" id="myForm">
 
 <font color='red' size='6'>CA WEBSITE</font><br>
-
+<strong><font size='3'><span id="Category"></span></strong></font>&nbsp;&nbsp&nbsp;<span id="Total1">Total Found: <strong><font size="3"><span id="Total"></span></font></strong></span></div>
+<br>
 
 <span id='AppsOnly'>
 <span id='MainCategory'>
@@ -585,9 +588,10 @@ function appStore() {
 <input class='allButtons' type=button id="All" style='margin:0px'; value='All Apps'></input>
 </span>
 
-<strong><font size='3'><span id="Category"></span></strong></font><span id="Total1" style='float: right';>Total Found: <strong><font size="3"><span id="Total"></span></font></strong></span>
 </span><br>
+
 <center>
+<br><br>
 <span id='sortButtons'>View Mode:
 <input type='button' class='viewButton' value='Tables' id='viewTable' style='margin:1px'>
 <input type='button' class='viewButton' value='Icon Details' id='viewDetail' style='margin:1px'>
@@ -607,7 +611,7 @@ Sort Direction:
 <span id='templates_content'></span>
 
 <center>
-<font size='2' color='red'>Note: All Applications listed here are 3rd party additions to unRaid.<br>Neither the authors of Community Applications nor Limetech make any warranty as to the suitability of any applications listed herein</font>
+<font size='5' color='red'><b>Note: All Applications listed here are 3rd party additions to unRaid.<br>Neither the authors of Community Applications nor Limetech make any warranty as to the suitability of any applications listed herein</b></font>
 </center>
 <a href="#" class="back-to-top" style="display: inline;"><img src='images/up.png' style='width:50px;height:50px' href="#" class="back-to-top"></img></a>
 

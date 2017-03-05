@@ -24,6 +24,7 @@ $DockerTemplates = new DockerTemplates();
 $communitySettings['appFeed']    = "true";   # set default for deprecated setting
 $communitySettings['iconSize']   = "96";
 $communitySettings['maxColumn']  ="5";
+$communitySettings['maxDetailColumns'] = 3;  # set for the maximum number of columns to display in details mode
 $communitySettings['separateInstalled']="false";
 $communitySettings['appOfTheDay']="no";
 if ( $communitySettings['favourite'] != "None" ) {
@@ -243,7 +244,7 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
   $ct = $skin[$viewMode]['header'].$skin[$viewMode]['sol'];
   $displayTemplate = $skin[$viewMode]['template'];
   if ( $viewMode == "detail" ) {
-    $communitySettings['maxColumn'] = 2; 
+    $communitySettings['maxColumn'] = $communitySettings['maxDetailColumns']; 
     $communitySettings['viewMode'] = "icon";
   }
 
@@ -333,7 +334,7 @@ function my_display_apps($viewMode,$file,$runningDockers,$imagesDocker) {
     $displayIcon = $displayIcon ? $displayIcon : "images/question.png";
     $template['display_iconSmall'] = "<a onclick='showDesc(".$template['ID'].",&#39;".$name."&#39;);' style='cursor:pointer'><img title='Click to display full description' src='".$displayIcon."' style='width:48px;height:48px;' onError='this.src=\"images/question.png\";'></a>";
     $template['display_iconSelectable'] = "<img src='$displayIcon' onError='this.src=\"images/question.png\";' style='width:".$iconSize."px;height=".$iconSize."px;'>";
-    $template['display_popupDesc'] = ( $communitySettings['maxColumn'] > 2 ) ? "Click for a full description\n".$template['PopUpDescription'] : "Click for a full description";
+    $template['display_popupDesc'] = ( $communitySettings['maxColumn'] > $communitySettings['maxDetailColumns'] ) ? "Click for a full description\n".$template['PopUpDescription'] : "Click for a full description";
     $template['display_dateUpdated'] = $template['Date'] ? "</b></strong><center><strong>Date Updated: </strong>".$template['display_humanDate']."</center>" : "";
     $template['display_iconClickable'] = "<a onclick=showDesc($ID,'$appName'); style='cursor:pointer' title='".$template['display_popupDesc']."'>".$template['display_iconSelectable']."</a>";
 
