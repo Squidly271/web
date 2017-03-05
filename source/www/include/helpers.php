@@ -311,7 +311,7 @@ function changeUpdateTime() {
   global $communityPaths;
 
   if ( is_file($communityPaths['lastUpdated-old']) ) {
-    $appFeedTime = readJsonFile($communityPaths['lastUpdated-old']);
+    $appFeedTime['last_updated_timestamp'] = file_get_contents($communityPaths['lastUpdated-old']);
   } else {
     $appFeedTime['last_updated_timestamp'] = filemtime($communityPaths['community-templates-info']);
   }

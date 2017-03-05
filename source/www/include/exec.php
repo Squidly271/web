@@ -141,6 +141,7 @@ function DownloadApplicationFeed() {
     $i = ++$i;
   }
   writeJsonFile($communityPaths['community-templates-info'],$myTemplates);
+  file_put_contents($communityPaths['lastUpdated-old'],$ApplicationFeed['last_updated_timestamp']);
   @unlink($communityPaths['LegacyMode']);
   return true;
 }
@@ -427,6 +428,12 @@ case 'get_content':
 
   $newAppTime = strtotime($communitySettings['timeNew']);
 
+  # automatically update the content as the appfeed changes
+  $appFeedTime = file_get_contents($communityPaths['application-feed-last-updated']);
+  $lastTime = file_get_contents($communityPaths['lastUpdated-old']);
+  if ($appFeedTime > $lastTime ) {
+    @unlink($infoFile);
+  }
   
   if (!file_exists($infoFile)) {
     if ( $communitySettings['appFeed'] == "true" ) {
